@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LevelStandardized {
+  L3
+  L4
+  L5
+  L6
+  SDE_I
+  SDE_II
+  SDE_III
+  Staff
+  Principal
+  IC4
+  IC5
+}
+
+enum Currency {
+  INR
+  USD
+  GBP
+  EUR
+}
+
+enum Source {
+  CONTRIBUTOR
+  SCRAPED
+  AI_INFERRED
+}
+
+model Company {
+  id         Int             @id @default(autoincrement())
+  name       String          @unique
+  slug       String          @unique
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  salaries   SalaryRecord[]
+}
+
+model SalaryRecord {
+  id                 Int               @id @default(autoincrement())
+  company            Company           @relation(fields: [companyId], references: [id])
+  companyId          Int
+  role               String
+  level_standardized LevelStandardized
+  location           String
+  currency           Currency
+  experience_years   Int
+  base_salary        Int
+  bonus              Int               @default(0)
+  stock              Int               @default(0)
+  total_compensation Int
+  source             Source
+  confidence_score   Float
+  submitted_at       DateTime          @default(now())
+  is_verified        Boolean           @default(false)
+
+  @@index([companyId, role, level_standardized, location])
+}
